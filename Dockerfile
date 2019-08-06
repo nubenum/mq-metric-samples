@@ -70,5 +70,23 @@ RUN chmod 777 $GOPATH/buildInDocker.sh
 COPY . $GOPATH/src/$ORG/$REPO
 RUN chmod -R a+rx $GOPATH/src/$ORG/$REPO
 
-# Set the entrypoint to the script that will do the compilation
-ENTRYPOINT $GOPATH/buildInDocker.sh
+# Do the compilation
+RUN BUILD_EXTRA_INJECT="-X \"main.BuildStamp=`date +%Y%m%d-%H%M%S`\"" $GOPATH/buildInDocker.sh
+
+FROM debian:stable-slim
+
+ARG GOPATH_ARG="/go"
+ENV GOPATH=$GOPATH_ARG
+
+COPY --from=0 /opt/mqm/ /opt/mqm/
+COPY --from=0 $GOPATH/bin/ $GOPATH/bin/
+
+WORKDIR $GOPATH/bin
+
+ARG MQ_USER="mqm"
+RUN addgroup --system $MQ_USER && adduser --system $MQ_USER --ingroup $MQ_USER && \
+	chown -R $MQ_USER .
+
+USER $MQ_USER
+
+EXPOSE 9157
