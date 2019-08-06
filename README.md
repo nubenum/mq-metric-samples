@@ -1,3 +1,15 @@
+This fork adapts the Dockerfile so that it will build mg-metric-samples during Docker build:
+
+`docker build -t mq-metric-samples .`
+
+The connection user (i.e. UNIX user) used by the image can be set using `--build-arg MQ_USER=mqm` (this is the default). Then run directly inside a container mounting your config file, e.g.:
+
+`docker run -v $(pwd)/mq_prometheus.sh:/go/bin/mq_prometheus.sh mq-metric-samples /bin/sh ./mq_prometheus.sh`
+
+By the way, MQ V8 queue managers are also supported with a limited set of metrics (among others, queue depth), by setting the arg:
+
+`-ibmmq.usePublications=false`
+
 # mq-metric-samples
 
 This repository contains a collection of IBM® MQ sample clients that utilize
